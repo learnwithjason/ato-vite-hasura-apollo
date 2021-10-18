@@ -1,10 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useSubscription, useMutation, gql } from '@apollo/client';
 import './App.css';
 
 function App() {
-  const { loading, error, data } = useQuery(gql`
-    query LoadQuestions {
+  const [castVote] = useMutation(gql`
+    mutation VoteForAnswer($id: Int!) {
+      update_answers(where: { id: { _eq: $id } }, _inc: { count: 1 }) {
+        returning {
+          id
+          count
+          text
+        }
+      }
+    }
+  `);
+
+  const { loading, error, data } = useSubscription(gql`
+    subscription LoadQuestions {
       questions {
         id
         question
@@ -32,7 +44,10 @@ function App() {
           <div key={`question-${question.id}`}>
             <h3>{question.question}</h3>
             {question.answers.map((answer) => (
-              <button key={`answer-${answer.id}`}>
+              <button
+                key={`answer-${answer.id}`}
+                onClick={() => castVote({ variables: { id: answer.id } })}
+              >
                 {answer.text} ({answer.count})
               </button>
             ))}

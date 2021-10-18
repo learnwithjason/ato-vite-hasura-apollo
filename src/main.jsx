@@ -1,9 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { WebSocketLink } from '@apollo/client/link/ws';
+
+const wsLink = new WebSocketLink({
+  uri: 'wss://ato-vite-hasura-apollo.hasura.app/v1/graphql',
+  options: {
+    reconnect: true,
+  },
+});
 
 const client = new ApolloClient({
-  uri: 'https://ato-vite-hasura-apollo.hasura.app/v1/graphql',
+  link: wsLink,
   cache: new InMemoryCache(),
 });
 
